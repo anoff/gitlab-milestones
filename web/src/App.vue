@@ -2,7 +2,7 @@
   <div class="page-container">
     <md-app>
       <md-app-toolbar class="md-primary">
-        <span class="md-title">My Title</span>
+        <span class="md-title">Gitlab Milestone Viewer 🦊</span>
       </md-app-toolbar>
 
       <md-app-content>
