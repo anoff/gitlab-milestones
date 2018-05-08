@@ -1,6 +1,14 @@
 <template>
   <div>
-    <form novalidate class="md-layout" v-on:submit.prevent="getMilestones">
+    <div class="button-group">
+    <md-button class="md-icon-button md-raised md-primary" v-on:click="showSettings = !showSettings">
+      <md-icon>menu</md-icon>
+    </md-button>
+    <md-button class="md-icon-button md-raised md-accent" v-if="!showSettings" v-on:click="getMilestones">
+        <md-icon>refresh</md-icon>
+      </md-button>
+    </div>
+    <form novalidate class="md-layout" v-on:submit.prevent="getMilestones" v-if="showSettings && !isLoading">
       <md-card class="md-layout-item md-size-50 md-small-size-100">
         <md-card-header>
           <div class="md-title">API</div>
@@ -23,15 +31,18 @@
             </div>
           </div>
         </md-card-content>
-        <md-progress-bar md-mode="indeterminate" v-if="isLoading" />
 
         <md-card-actions>
-          <md-button type="submit" class="md-primary md-raised" :disabled="isLoading">Load Milestones</md-button>
+          <md-button type="submit" class="md-accent md-raised" :disabled="isLoading">Load Milestones</md-button>
         </md-card-actions>
       </md-card>
 
       <md-snackbar :md-active.sync="dataLoaded">Milestones loaded successfully!</md-snackbar>
     </form>
+
+    <div align="center" v-if="isLoading">
+      <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate" class="md-accent" />
+    </div>
 
     <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id">
       <md-card-header>
@@ -62,12 +73,14 @@ export default {
         apiUrl: 'https://gitlab.com/api/v4/groups/2851568/milestones'
       },
       dataLoaded: false,
-      isLoading: false
+      isLoading: false,
+      showSettings: true
     }
   },
   methods: {
     getMilestones: function () {
       this.isLoading = true
+      this.showSettings = false
       axios.get(this.form.apiUrl, {
         headers: {
           'PRIVATE-TOKEN': this.form.apiToken
@@ -97,9 +110,13 @@ export default {
 
 <style scoped>
 .md-card {
-    width: 320px;
-    margin: 4px;
-    display: inline-block;
-    vertical-align: top;
-  }
+  width: 320px;
+  margin: 4px;
+  display: inline-block;
+  vertical-align: top;
+}
+
+.md-progress-spinner {
+  align-self: center;
+}
 </style>
