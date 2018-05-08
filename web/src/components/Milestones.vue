@@ -1,24 +1,22 @@
 <template>
   <div>
     <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id">
-      <md-ripple>
-        <md-card-header>
-          <div class="md-title">{{ ms.title }}</div>
-          <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
-        </md-card-header>
+      <md-card-header>
+        <div class="md-title">{{ ms.title }}</div>
+        <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
+      </md-card-header>
 
-        <md-card-content v-html="ms.md">
-        </md-card-content>
-      </md-ripple>
+      <md-card-content v-html="ms.md"></md-card-content>
     </md-card>
   </div>
 </template>
 
 <script>
 import axios from 'axios'
-import {Converter} from 'showdown'
+import mdIt from 'markdown-it'
+import mdCheckbox from 'markdown-it-checkbox'
 
-const converter = new Converter()
+const md = mdIt().use(mdCheckbox)
 
 export default {
   name: 'Milestones',
@@ -36,7 +34,7 @@ export default {
         }})
         .then(res => {
           this.milestones = res.data
-            .map(ms => Object.assign(ms, {md: converter.makeHtml(ms.description)}))
+            .map(ms => Object.assign(ms, {md: md.render(ms.description)}))
         })
     }
   },
@@ -55,5 +53,10 @@ export default {
 </script>
 
 <style scoped>
-
+.md-card {
+    width: 320px;
+    margin: 4px;
+    display: inline-block;
+    vertical-align: top;
+  }
 </style>

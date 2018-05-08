@@ -1,6 +1,14 @@
 <template>
-  <div id="app">
-    <Milestones/>
+  <div class="page-container">
+    <md-app>
+      <md-app-toolbar class="md-primary">
+        <span class="md-title">My Title</span>
+      </md-app-toolbar>
+
+      <md-app-content>
+        <Milestones/>
+      </md-app-content>
+    </md-app>
   </div>
 </template>
 
