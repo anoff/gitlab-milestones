@@ -14,6 +14,7 @@
     "axios": "^0.18.0",
     "dotenv": "^5.0.1",
     "object.map": "^1.0.1",
+    "showdown": "^1.8.6",
     "vue": "^2.5.2",
     "vue-material": "^1.0.0-beta-7"
   },
