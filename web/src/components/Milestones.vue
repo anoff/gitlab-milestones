@@ -35,6 +35,7 @@ export default {
         .then(res => {
           this.milestones = res.data
             .map(ms => Object.assign(ms, {md: md.render(ms.description)}))
+            .sort((a, b) => a.start_date > b.start_date)
         })
     }
   },
