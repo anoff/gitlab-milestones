@@ -40,7 +40,7 @@
       <md-snackbar :md-active.sync="dataLoaded">Milestones loaded successfully!</md-snackbar>
     </form>
 
-    <md-snackbar :md-active.sync="dataLoadError">Error while loading: {{ dataLoadError }}</md-snackbar>
+    <md-snackbar :md-active.sync="isLoadError">Error while loading: {{ dataLoadError }}</md-snackbar>
     <div align="center" v-if="isLoading">
       <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate" class="md-accent" />
     </div>
@@ -74,6 +74,7 @@ export default {
       },
       dataLoaded: false,
       isLoading: false,
+      isLoadError: false,
       showSettings: true,
       dataLoadError: false
     }
@@ -92,26 +93,34 @@ export default {
             .sort((a, b) => a.start_date > b.start_date)
           this.isLoading = false
           this.dataLoaded = true
+          this.isLoadError = false
+          this.dataLoadError = null
+          // update local storage only if request was successful
+          if (localStorage) {
+            localStorage.setItem('gitlab-milestones-viewer', JSON.stringify(this.form))
+          }
         })
         .catch(err => {
           this.isLoading = false
           this.dataLoaded = false
-          this.dataLoadError = true
+          this.dataLoadError = err.message
+          this.isLoadError = true
+          this.showSettings = true
           console.error(err)
         })
-
-      if (localStorage) {
-        localStorage.setItem('gitlab-milestones-viwer', JSON.stringify(this.form))
-      }
     }
   },
   beforeMount () {
     if (localStorage) {
-      const storageSettings = localStorage.getItem('gitlab-milestones-viwer')
+      const storageSettings = localStorage.getItem('gitlab-milestones-viewer')
       if (storageSettings) {
         const json = JSON.parse(storageSettings)
         this.form.apiUrl = json.apiUrl
         this.form.apiToken = json.apiToken
+      }
+      const url = new URL(window.location.href)
+      if (/[?&]autoload=/.test(url.search)) {
+        this.getMilestones()
       }
     }
   },
