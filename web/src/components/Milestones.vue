@@ -54,7 +54,7 @@
         <md-card-content v-html="ms.md"></md-card-content>
         <md-list class="md-double-line md-dense">
           <md-subheader>Issues</md-subheader>
-          <md-list-item v-for="issue in issues[ms.id]" v-bind:key="issue.id">
+          <md-list-item v-for="issue in ms.issues" v-bind:key="issue.id">
             <span style="font-size: 2em; margin-right: 10px;" v-if="issue.state === 'closed'">✅</span>
             <span style="font-size: 2em; margin-right: 10px;" v-else>💤</span>
             <div class="md-list-item-text">
@@ -102,7 +102,7 @@ export default {
         }})
         .then(res => {
           this.milestones = res.data
-            .map(ms => Object.assign(ms, {md: md.render(ms.description)}))
+            .map(ms => Object.assign(ms, {md: md.render(ms.description), issues: []}))
             .sort((a, b) => a.start_date > b.start_date)
           this.isLoadError = false
           this.dataLoadError = null
@@ -117,8 +117,6 @@ export default {
         .then(allIssues => {
           this.isLoading = false
           this.dataLoaded = true
-          console.log('YAY')
-          vm.$forceUpdate()
         })
         .catch(err => {
           this.isLoading = false
@@ -130,17 +128,15 @@ export default {
         })
     },
     getIssues: function (milestoneName) {
-      axios.get(`https://gitlab.com/api/v4/groups/2851568/issues?milestone=${milestoneName}`, {
+      return axios.get(`https://gitlab.com/api/v4/groups/2851568/issues?milestone=${milestoneName}`, {
         headers: {
           'PRIVATE-TOKEN': this.form.apiToken
         }})
         .then(res => {
           res.data.forEach(issue => {
             const msId = issue.milestone.id
-            if (!this.issues[msId]) {
-              this.issues[msId] = []
-            }
-            this.issues[msId].push(issue)
+            const msIx = this.milestones.findIndex(m => m.id === msId)
+            this.milestones[msIx].issues.push(issue)
           })
           return res
         })
