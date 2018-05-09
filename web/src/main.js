@@ -8,8 +8,8 @@ import 'vue-material/dist/theme/black-green-light.css'
 
 Vue.use(VueMaterial)
 
-/* eslint-disable no-new */
-new Vue({
+/* eslint-disable no-new, no-unused-vars */
+const vm = new Vue({
   el: '#app',
   components: { App },
   template: '<App/>'

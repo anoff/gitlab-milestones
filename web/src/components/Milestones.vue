@@ -44,15 +44,27 @@
     <div align="center" v-if="isLoading">
       <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate" class="md-accent" />
     </div>
+    <md-content class="scrolling-wrapper">
+      <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id">
+        <md-card-header>
+          <div class="md-title">{{ ms.title }}</div>
+          <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
+        </md-card-header>
 
-    <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id">
-      <md-card-header>
-        <div class="md-title">{{ ms.title }}</div>
-        <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
-      </md-card-header>
-
-      <md-card-content v-html="ms.md"></md-card-content>
-    </md-card>
+        <md-card-content v-html="ms.md"></md-card-content>
+        <md-list class="md-double-line md-dense">
+          <md-subheader>Issues</md-subheader>
+          <md-list-item v-for="issue in issues[ms.id]" v-bind:key="issue.id">
+            <span style="font-size: 2em; margin-right: 10px;" v-if="issue.state === 'closed'">✅</span>
+            <span style="font-size: 2em; margin-right: 10px;" v-else>💤</span>
+            <div class="md-list-item-text">
+              <span><a :href="issue.web_url" target="_blank">#{{ issue.iid }}</a></span>
+              <span>{{ issue.title }}</span>
+            </div>
+          </md-list-item>
+        </md-list>
+      </md-card>
+    </md-content>
   </div>
 </template>
 
@@ -68,6 +80,7 @@ export default {
   data () {
     return {
       milestones: [],
+      issues: {},
       form: {
         apiToken: '',
         apiUrl: ''
@@ -91,14 +104,21 @@ export default {
           this.milestones = res.data
             .map(ms => Object.assign(ms, {md: md.render(ms.description)}))
             .sort((a, b) => a.start_date > b.start_date)
-          this.isLoading = false
-          this.dataLoaded = true
           this.isLoadError = false
           this.dataLoadError = null
           // update local storage only if request was successful
           if (localStorage) {
             localStorage.setItem('gitlab-milestones-viewer', JSON.stringify(this.form))
           }
+          return Promise.all(
+            this.milestones.map(m => this.getIssues(m.title))
+          )
+        })
+        .then(allIssues => {
+          this.isLoading = false
+          this.dataLoaded = true
+          console.log('YAY')
+          vm.$forceUpdate()
         })
         .catch(err => {
           this.isLoading = false
@@ -107,6 +127,22 @@ export default {
           this.isLoadError = true
           this.showSettings = true
           console.error(err)
+        })
+    },
+    getIssues: function (milestoneName) {
+      axios.get(`https://gitlab.com/api/v4/groups/2851568/issues?milestone=${milestoneName}`, {
+        headers: {
+          'PRIVATE-TOKEN': this.form.apiToken
+        }})
+        .then(res => {
+          res.data.forEach(issue => {
+            const msId = issue.milestone.id
+            if (!this.issues[msId]) {
+              this.issues[msId] = []
+            }
+            this.issues[msId].push(issue)
+          })
+          return res
         })
     }
   },
@@ -141,9 +177,17 @@ export default {
   margin: 4px;
   display: inline-block;
   vertical-align: top;
+  max-height: 520px;
+  overflow: auto;
 }
 
 .md-progress-spinner {
   align-self: center;
+}
+
+.scrolling-wrapper {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  white-space: nowrap;
 }
 </style>
