@@ -1,6 +1,6 @@
 <template>
-  <div class="page-container">
-    <md-app>
+  <div id="container">
+    <md-app style="height: 100%;">
       <md-app-toolbar class="md-primary">
         <span class="md-title">Gitlab Milestone Viewer 🦊</span>
       </md-app-toolbar>
@@ -24,12 +24,12 @@ export default {
 </script>
 
 <style>
-#app {
+#container {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  min-height: 100vh;
 }
 </style>

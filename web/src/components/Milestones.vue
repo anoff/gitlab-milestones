@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="height: 100%;">
     <div class="button-group">
     <md-button class="md-icon-button md-raised md-primary" v-on:click="showSettings = !showSettings">
       <md-icon>menu</md-icon>
@@ -40,6 +40,7 @@
       <md-snackbar :md-active.sync="dataLoaded">Milestones loaded successfully!</md-snackbar>
     </form>
 
+    <md-snackbar :md-active.sync="dataLoadError">Error while loading: {{ dataLoadError }}</md-snackbar>
     <div align="center" v-if="isLoading">
       <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate" class="md-accent" />
     </div>
@@ -66,15 +67,15 @@ export default {
   name: 'Milestones',
   data () {
     return {
-      msg: 'Welcome to Your Vue.js App',
       milestones: [],
       form: {
-        apiToken: process.env.GITLAB_ACCESS_KEY,
-        apiUrl: 'https://gitlab.com/api/v4/groups/2851568/milestones'
+        apiToken: '',
+        apiUrl: ''
       },
       dataLoaded: false,
       isLoading: false,
-      showSettings: true
+      showSettings: true,
+      dataLoadError: false
     }
   },
   methods: {
@@ -92,10 +93,27 @@ export default {
           this.isLoading = false
           this.dataLoaded = true
         })
+        .catch(err => {
+          this.isLoading = false
+          this.dataLoaded = false
+          this.dataLoadError = true
+          console.error(err)
+        })
+
+      if (localStorage) {
+        localStorage.setItem('gitlab-milestones-viwer', JSON.stringify(this.form))
+      }
     }
   },
   beforeMount () {
-    // this.getMilestones()
+    if (localStorage) {
+      const storageSettings = localStorage.getItem('gitlab-milestones-viwer')
+      if (storageSettings) {
+        const json = JSON.parse(storageSettings)
+        this.form.apiUrl = json.apiUrl
+        this.form.apiToken = json.apiToken
+      }
+    }
   },
   filters: {
     formatDate: function (value) {
