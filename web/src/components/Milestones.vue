@@ -16,18 +16,20 @@
 
         <md-card-content>
           <div class="md-layout md-gutter">
-            <div class="md-layout-item md-small-size-100">
+            <div class="md-layout-item md-small-size-150">
               <md-field>
                 <label for="api-token">API Token</label>
                 <md-input name="api-token" id="api-token" autocomplete="given-name" v-model="form.apiToken" :disabled="isLoading" />
               </md-field>
-            </div>
-
-            <div class="md-layout-item md-small-size-100">
               <md-field>
                 <label for="api-url">API Endpoint</label>
                 <md-input name="api-url" id="api-url" autocomplete="family-name" v-model="form.apiUrl" :disabled="isLoading" />
               </md-field>
+            </div>
+
+            <div class="md-layout-item md-small-size-50">
+              <md-switch v-model="form.hideMilestones"><small>Hide closed milestones</small></md-switch>
+              <md-switch v-model="form.hideIssues"><small>Hide closed issues</small></md-switch>
             </div>
           </div>
         </md-card-content>
@@ -36,25 +38,25 @@
           <md-button type="submit" class="md-accent md-raised" :disabled="isLoading">Load Milestones</md-button>
         </md-card-actions>
       </md-card>
-
-      <md-snackbar :md-active.sync="dataLoaded">Milestones loaded successfully!</md-snackbar>
     </form>
 
+    <md-snackbar :md-active.sync="dataLoaded">Milestones loaded successfully!</md-snackbar>
     <md-snackbar :md-active.sync="isLoadError">Error while loading: {{ dataLoadError }}</md-snackbar>
     <div align="center" v-if="isLoading">
       <md-progress-spinner :md-diameter="100" :md-stroke="10" md-mode="indeterminate" class="md-accent" />
     </div>
     <md-content class="scrolling-wrapper">
-      <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id">
+      <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id" v-if="ms.state !== 'closed' || !form.hideMilestones">
         <md-card-header>
-          <div class="md-title">{{ ms.title }}</div>
+          <div class="md-title">
+            {{ ms.title }}</div>
           <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
         </md-card-header>
 
         <md-card-content v-html="ms.md"></md-card-content>
         <md-list class="md-double-line md-dense">
           <md-subheader>Issues</md-subheader>
-          <md-list-item v-for="issue in ms.issues" v-bind:key="issue.id" :href="issue.web_url" target="_blank">
+          <md-list-item v-for="issue in ms.issues" v-bind:key="issue.id" :href="issue.web_url" target="_blank" v-if="issue.state !== 'closed' || !form.hideIssues">
             <span style="font-size: 2em; margin-right: 10px;" v-if="issue.state === 'closed'">✅</span>
             <span style="font-size: 2em; margin-right: 10px;" v-else>💤</span>
             <div class="md-list-item-text">
@@ -83,7 +85,9 @@ export default {
       issues: {},
       form: {
         apiToken: '',
-        apiUrl: ''
+        apiUrl: '',
+        hideMilestones: true,
+        hideIssues: false
       },
       dataLoaded: false,
       isLoading: false,
@@ -128,7 +132,11 @@ export default {
         })
     },
     getIssues: function (milestoneName) {
-      return axios.get(`https://gitlab.com/api/v4/groups/2851568/issues?milestone=${milestoneName}`, {
+      // create issue url from milestones url
+      const milestoneUrl = this.form.apiUrl
+      const groupId = milestoneUrl.match(/\/([0-9]+)\/milestones/i)[1]
+      const baseUrl = milestoneUrl.match(/(.*)\/[0-9]+\/milestones/)[1]
+      return axios.get(`${baseUrl}/${groupId}/issues?milestone=${milestoneName}`, {
         headers: {
           'PRIVATE-TOKEN': this.form.apiToken
         }})
@@ -169,7 +177,8 @@ export default {
 
 <style scoped>
 .md-card {
-  width: 320px;
+  min-width: 320px;
+  width: fit-content;
   margin: 4px;
   display: inline-block;
   vertical-align: top;
@@ -185,5 +194,8 @@ export default {
   overflow-x: scroll;
   overflow-y: hidden;
   white-space: nowrap;
+}
+.md-switch {
+  display: flex;
 }
 </style>
