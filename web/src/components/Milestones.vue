@@ -48,8 +48,7 @@
     <md-content class="scrolling-wrapper">
       <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id" v-if="ms.state !== 'closed' || !form.hideMilestones">
         <md-card-header>
-          <div class="md-title">
-            {{ ms.title }}</div>
+          <div class="md-title" v-bind:class="{ strikethrough: ms.state === 'closed' }">{{ ms.title }}</div>
           <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
         </md-card-header>
 
@@ -60,7 +59,7 @@
             <span style="font-size: 2em; margin-right: 10px;" v-if="issue.state === 'closed'">✅</span>
             <span style="font-size: 2em; margin-right: 10px;" v-else>💤</span>
             <div class="md-list-item-text">
-              <span>#{{ issue.iid }}</span>
+              <span>{{ getIssueRef(issue.web_url) }}</span>
               <span>{{ issue.title }}</span>
             </div>
           </md-list-item>
@@ -148,6 +147,11 @@ export default {
           })
           return res
         })
+    },
+    getIssueRef: function (issueUrl) {
+      const url = new URL(issueUrl)
+      const match = url.pathname.match(/\/(.*)\/issues\/([0-9]+)/i)
+      return `${match[1]}#${match[2]}`
     }
   },
   beforeMount () {
@@ -197,5 +201,8 @@ export default {
 }
 .md-switch {
   display: flex;
+}
+.strikethrough {
+  text-decoration: line-through;
 }
 </style>
