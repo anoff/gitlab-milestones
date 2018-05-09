@@ -54,11 +54,11 @@
         <md-card-content v-html="ms.md"></md-card-content>
         <md-list class="md-double-line md-dense">
           <md-subheader>Issues</md-subheader>
-          <md-list-item v-for="issue in ms.issues" v-bind:key="issue.id">
+          <md-list-item v-for="issue in ms.issues" v-bind:key="issue.id" :href="issue.web_url" target="_blank">
             <span style="font-size: 2em; margin-right: 10px;" v-if="issue.state === 'closed'">✅</span>
             <span style="font-size: 2em; margin-right: 10px;" v-else>💤</span>
             <div class="md-list-item-text">
-              <span><a :href="issue.web_url" target="_blank">#{{ issue.iid }}</a></span>
+              <span>#{{ issue.iid }}</span>
               <span>{{ issue.title }}</span>
             </div>
           </md-list-item>
