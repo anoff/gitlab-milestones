@@ -19,7 +19,7 @@
             <div class="md-layout-item md-small-size-150">
               <md-field>
                 <label for="api-token">API Token</label>
-                <md-input name="api-token" id="api-token" autocomplete="given-name" v-model="form.apiToken" :disabled="isLoading" />
+                <md-input name="api-token" id="api-token" autocomplete="given-name" v-model="form.apiToken" :disabled="isLoading" type="password" />
               </md-field>
               <md-field>
                 <label for="api-url">API Endpoint</label>
