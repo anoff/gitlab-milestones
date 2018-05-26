@@ -48,7 +48,7 @@
     <md-content class="scrolling-wrapper">
       <md-card md-with-hover v-for="ms in milestones" v-bind:key="ms.id" v-if="ms.state !== 'closed' || !form.hideMilestones">
         <md-card-header>
-          <div class="md-title" v-bind:class="{ strikethrough: ms.state === 'closed' }">{{ ms.title }}</div>
+          <div class="md-title" v-bind:class="{ strikethrough: ms.state === 'closed' }"><a :href="baseUrl + '/-/milestones/' + ms.iid" target="_blank">{{ ms.title }}</a></div>
           <div class="md-subhead">{{ ms.start_date | formatDate }} ➡️ {{ ms.due_date | formatDate }}</div>
         </md-card-header>
 
@@ -92,7 +92,8 @@ export default {
       isLoading: false,
       isLoadError: false,
       showSettings: true,
-      dataLoadError: false
+      dataLoadError: false,
+      baseUrl: null
     }
   },
   methods: {
@@ -120,6 +121,16 @@ export default {
         .then(allIssues => {
           this.isLoading = false
           this.dataLoaded = true
+        })
+        .then(() => {
+          const baseUrl = this.form.apiUrl.replace(/\/?milestones\/?/, '')
+          axios.get(baseUrl, {
+            headers: {
+              'PRIVATE-TOKEN': this.form.apiToken
+            }})
+            .then(res => {
+              this.baseUrl = res.data.web_url
+            })
         })
         .catch(err => {
           this.isLoading = false
