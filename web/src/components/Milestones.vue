@@ -186,8 +186,7 @@ export default {
   margin: 4px;
   display: inline-block;
   vertical-align: top;
-  max-height: 520px;
-  overflow: auto;
+  overflow: scroll;
 }
 
 .md-progress-spinner {
