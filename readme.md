@@ -2,6 +2,9 @@
 
 > help you plan 📝 with gitlab 🦊 milestones 🏁
 
+
+> 🚨🚨🚨 This project is no longer maintained and may contain outdated, insecure dependencies
+
 ## Usage
 
 To use the webpack dev server run `npm run dev` inside the `web/` directory.
